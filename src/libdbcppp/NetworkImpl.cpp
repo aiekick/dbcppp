@@ -2,6 +2,7 @@
 #include <iomanip>
 #include "../../include/dbcppp/Network.h"
 #include "NetworkImpl.h"
+#include "AttributeDefinitionImpl.h"
 
 using namespace dbcppp;
 
@@ -264,10 +265,30 @@ void INetwork::Merge(std::unique_ptr<INetwork>&& other)
     {
         self.environmentVariables().push_back(std::move(ev));
     }
+
+    ///// Aiekick /////////////////////////////////////////////////////
+    
+    std::map<std::string, AttributeDefinitionImpl> attDefs;
+    
+    for (auto& ad : self.attributeDefinitions())
+    {
+        attDefs[ad.Name()] = std::move(ad);
+    }
+    
     for (auto& ad : o.attributeDefinitions())
     {
-        self.attributeDefinitions().push_back(std::move(ad));
+        attDefs[ad.Name()] = std::move(ad);
     }
+
+    self.attributeDefinitions().clear();
+
+    for (auto& ad : attDefs)
+    {
+        self.attributeDefinitions().push_back(std::move(ad.second));
+    }
+
+    ///////////////////////////////////////////////////////////////////
+
     for (auto& ad : o.attributeDefaults())
     {
         self.attributeDefaults().push_back(std::move(ad));

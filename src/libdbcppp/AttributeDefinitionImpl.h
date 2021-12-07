@@ -8,6 +8,7 @@ namespace dbcppp
         : public IAttributeDefinition
     {
     public:
+        AttributeDefinitionImpl(){}
         AttributeDefinitionImpl(std::string&& name, EObjectType object_type, value_type_t value_type);
         
         virtual std::unique_ptr<IAttributeDefinition> Clone() const override;
