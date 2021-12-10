@@ -277,7 +277,56 @@ void INetwork::Merge(std::unique_ptr<INetwork>&& other)
     
     for (auto& ad : o.attributeDefinitions())
     {
-        attDefs[ad.Name()] = std::move(ad);
+        if (attDefs.find(ad.Name()) != attDefs.end())
+        {
+            double old_min = 0.0f;
+            double old_max = 0.0f;
+            auto old_vt = attDefs[ad.Name()].ValueType();
+            if (std::get_if<IAttributeDefinition::ValueTypeInt>(&old_vt))
+            {
+                old_min = (double)std::get<IAttributeDefinition::ValueTypeInt>(old_vt).minimum;
+                old_max = (double)std::get<IAttributeDefinition::ValueTypeInt>(old_vt).maximum;
+            }
+            else if (std::get_if<IAttributeDefinition::ValueTypeHex>(&old_vt))
+            {
+                old_min = (double)std::get<IAttributeDefinition::ValueTypeHex>(old_vt).minimum;
+                old_max = (double)std::get<IAttributeDefinition::ValueTypeHex>(old_vt).maximum;
+            }
+            else if (std::get_if<IAttributeDefinition::ValueTypeFloat>(&old_vt))
+            {
+                old_min = (double)std::get<IAttributeDefinition::ValueTypeFloat>(old_vt).minimum;
+                old_max = (double)std::get<IAttributeDefinition::ValueTypeFloat>(old_vt).maximum;
+            }
+
+            double new_min = 0.0f;
+            double new_max = 0.0f;
+            auto new_vt = ad.ValueType();
+            if (std::get_if<IAttributeDefinition::ValueTypeInt>(&new_vt))
+            {
+                new_min = (double)std::get<IAttributeDefinition::ValueTypeInt>(new_vt).minimum;
+                new_max = (double)std::get<IAttributeDefinition::ValueTypeInt>(new_vt).maximum;
+            }
+            else if (std::get_if<IAttributeDefinition::ValueTypeHex>(&new_vt))
+            {
+                new_min = (double)std::get<IAttributeDefinition::ValueTypeHex>(new_vt).minimum;
+                new_max = (double)std::get<IAttributeDefinition::ValueTypeHex>(new_vt).maximum;
+            }
+            else if (std::get_if<IAttributeDefinition::ValueTypeFloat>(&new_vt))
+            {
+                new_min = (double)std::get<IAttributeDefinition::ValueTypeFloat>(new_vt).minimum;
+                new_max = (double)std::get<IAttributeDefinition::ValueTypeFloat>(new_vt).maximum;
+            }
+
+            // sui le nouveau englobe le precedent on le reecrit
+            if (new_min < old_min || new_max > old_max)
+            {
+                attDefs[ad.Name()] = std::move(ad);
+            }
+        }
+        else
+        {
+            attDefs[ad.Name()] = std::move(ad);
+        }
     }
 
     self.attributeDefinitions().clear();
